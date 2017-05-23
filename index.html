@@ -1,105 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Upcoming GraphQL events</title>
-    <style>
-        #map {
-            height: 400px;
-            width: 100%;
-        }
-    </style>
-    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-</head>
-<body>
-<h1>Upcoming GraphQL events</h1>
-<div id="map"></div>
-<script language="JavaScript">
-    function initMap() {
-        var londonish = {lat: 51.5, lng: 0.12};
-        var map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 6,
-            center: londonish
-        });
+<!doctype html>
+<html class="no-js" lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>GraphQL events map</title>
+        <meta name="description" content="A map of all upcoming GraphQL events, as provided by the GraphQL Community Graph API">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        var query = "\
-{\
-    Venue(first:30) {\
-        latitude\
-        longitude\
-        events(first:30,status:\"upcoming\") {\
-            title\
-            link\
-            past\
-            status\
-            time\
-        }\
-    }\
-}";
-        $.post({
-            "accepts": {
-                json: "application/json"
-            },
-            "contentType": "application/json",
-            "url": 'https://graphql.communitygraph.org/graphql/',
-            "processData": false,
-            "data": JSON.stringify({"query": query}),
-            "timeout": 3000,
-            "success": function(data, textStatus, jqXHR) {
-                data.data.Venue.forEach(function (venue) {
-                    if (venue.events.length > 0 && venue.latitude && venue.longitude) {
-                        var content = '';
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <!-- Place favicon.ico in the root directory -->
 
-                        venue.events.forEach(function (event) {
-                            content += "<h2>" + event.title + "</h2>";
-                            if (event.time) {
-                                content += "<p>Event date: " + (new Date(event.time)).toUTCString();
-                            }
-                            if (event.link) {
-                                content += "<p><a href='" + event.link + "'>Find out more...</a>";
-                            }
-                        });
+        <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link rel="stylesheet" href="css/main.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+    </head>
+    <body>
+        <!--[if lt IE 8]>
+            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
 
-                        var infowindow = new google.maps.InfoWindow({
-                            content: content
-                        });
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">GraphQL events map</a>
+                </div>
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">Upcoming events</a></li>
+                    <!-- TODO
+                    <li><a href="#">Past events</a></li>
+                    -->
+                </ul>
+            </div>
+        </nav>
 
-                        var marker = new google.maps.Marker({
-                            position: {lat: venue.latitude, lng: venue.longitude},
-                            icon: {
-                                url: 'https://upload.wikimedia.org/wikipedia/commons/1/17/GraphQL_Logo.svg',
-                                scaledSize: new google.maps.Size(50, 50),
-                                origin: new google.maps.Point(0, 0),
-                                anchor: new google.maps.Point(20, 20)
-                            },
-                            map: map
-                        });
+        <div class="container page-header">
+            <h1>Upcoming GraphQL Events</h1>
 
-                        marker.addListener('click', function () {
-                            infowindow.open(map, marker);
-                        });
-                    }
-                });
-            },
-            "error": function() {
-                alert('\'scuse me, query request failed. Anyway, would you consider visiting London?');
+            <div id="map"></div>
 
-                var marker = new google.maps.Marker({
-                    position: londonish,
-                    icon: {
-                        url: 'https://upload.wikimedia.org/wikipedia/commons/1/17/GraphQL_Logo.svg',
-                        size: new google.maps.Size(512,512),
-                        scaledSize: new google.maps.Size(50,50),
-                        anchor: new google.maps.Point(25,25)
-                    },
-                    map: map
-                });
-            }
-        });
-    }
-</script>
-<script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=INSERT_KEY_HERE&callback=initMap">
-</script>
-</body>
+            <div class="well">
+                <p><a
+                        href="http://graphql.communitygraph.org/graphiql/?query=%7B%0A%20%20Venue(first%3A%2030)%20%7B%0A%20%20%20%20latitude%0A%20%20%20%20longitude%0A%20%20%20%20events(first%3A%2030%2C%20past%3A%20false)%20%7B%0A%20%20%20%20%20%20title%0A%20%20%20%20%20%20link%0A%20%20%20%20%20%20past%0A%20%20%20%20%20%20status%0A%20%20%20%20%20%20time%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D%0A">
+                    Browse the source data</a> using GraphiQL</p>
+            </div>
+        </div>
+        <div class="container">
+            <footer>
+                <p>A <a href="https://dev-blog.apollodata.com/announcing-the-neo4j-graphql-community-graph-hackathon-c9a94f246c7">
+                    neo4j hackathon</a> submission prepared with
+                    <a href="http://graphql.communitygraph.org/">GraphQL Community Graph</a> API</p>
+            </footer>
+        </div>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script src="js/plugins.js"></script>
+        <script src="js/main.js"></script>
+        <script async defer
+                src="https://maps.googleapis.com/maps/api/js?key=INSERT_KEY_HERE&callback=initMap">
+        </script>
+
+    </body>
 </html>
